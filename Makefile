@@ -1,3 +1,3 @@
 run:
 	cd ./internal; \
-	  go run ./main.go
+	  go run *.go 
