@@ -1,25 +1,24 @@
 package main
 
 import (
-	"fmt"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
 )
 
-func InitHttp(config Config) {
+func InitHttp(config Config, linkCtrl LinkCtrl) {
 	r := gin.Default()
+	r.LoadHTMLGlob("../web/template/*")
+
+	r.GET("/", func(c *gin.Context) {
+		c.HTML(http.StatusOK, "index.tmpl", gin.H{
+			"title": "Surly url shorthand service",
+		})
+	})
+
 	v1 := r.Group("/api/v1")
-	v1.POST("/paste", func(c *gin.Context) {
-		link := c.Query("link")
-		c.JSON(http.StatusOK, gin.H{"shortLink": link})
-	})
-
-	r.GET("/:hash", func(c *gin.Context) {
-		hash := c.Param("hash")
-
-		c.Redirect(http.StatusPermanentRedirect, fmt.Sprintf("https://google.com?q=%s", hash))
-	})
+	v1.POST("/shorten", linkCtrl.ShortenLink)
+	r.GET("/:hash", linkCtrl.Redirect)
 
 	r.Run(config.HttpAddr)
 }
